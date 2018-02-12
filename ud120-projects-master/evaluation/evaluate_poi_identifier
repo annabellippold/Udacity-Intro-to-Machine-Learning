@@ -1,0 +1,156 @@
+#!/usr/bin/python
+
+
+"""
+    Starter code for the evaluation mini-project.
+    Start by copying your trained/tested POI identifier from
+    that which you built in the validation mini-project.
+
+    This is the second step toward building your POI identifier!
+
+    Start by loading/formatting the data...
+"""
+
+import pickle
+import sys
+sys.path.append("../tools/")
+from feature_format import featureFormat, targetFeatureSplit
+
+data_dict = pickle.load(open("../final_project/final_project_dataset.pkl", "r") )
+
+### add more features to features_list!
+features_list = ["poi", "salary"]
+
+data = featureFormat(data_dict, features_list)
+labels, features = targetFeatureSplit(data)
+
+
+
+### your code goes here 
+
+# for splitting data import modul
+from sklearn import cross_validation
+from sklearn.model_selection import train_test_split
+
+# set random_state to 42
+features_train, features_test, labels_train, labels_test = cross_validation.train_test_split(
+    features, labels, test_size = 0.3, random_state = 42)
+
+from sklearn import tree
+clf = tree.DecisionTreeClassifier()
+clf = clf.fit(features_train, labels_train)
+pred = clf.predict(features_test)
+
+from sklearn.metrics import accuracy_score
+print "Accuracy: ", accuracy_score(pred, labels_test)
+
+""" Result:
+    Accuracy:  0.724137931034
+"""
+
+# How many POIs are in the test_set?
+print "Count POI test: ", int( sum(pred) )
+""" Result:
+    Count POI test:  4
+"""
+# How many people total are in your data set?
+print "Total: ",len(labels_test)
+""" Result:
+    Total:  29
+"""    
+
+#If your identifier predicted 0. (not POI) for everyone in the test set, 
+#what would its accuracy be?
+pred_0 = [0.] * 29
+accuracy_0 = accuracy_score(pred_0, labels_test)
+print "Accuracy for 0:", accuracy_0
+""" Result:
+    Accuracy for 0: 0.862068965517  
+""" 
+
+#Look at the predictions of your model and compare them to the true test 
+#labels. Do you get any true positives? (In this case, we define a true 
+#positive as a case where both the actual label and the predicted label are 1)
+
+of_true_positives = [(x,y) for x, y in zip(pred,labels_test) if x == y and x == 1.0]
+print "True positives on the Overfitted model: ", len(of_true_positives)
+""" Result:
+    True positives on the Overfitted model:  0
+"""
+
+# What's the precision
+from sklearn.metrics import confusion_matrix
+print confusion_matrix(pred,labels_test)
+""" Result:
+    [[21  4]
+    [ 4  0]]
+"""
+import sklearn.metrics as m
+print "Precision: ", m.precision_score(pred, labels_test)
+""" Result:
+    Precision:  0.0
+"""
+
+print "Recall: ", m.recall_score(pred, labels_test)
+""" Result:
+    Recall:  0.0
+"""
+
+# How many true positives?
+cpp = [1 for j in zip(labels_train, pred) if j[0] == j[1] and j[1] == 1]
+print cpp
+print "Labels: ", labels_train
+print "Prediction: ", pred
+""" 
+    [1, 1, 1]
+    Labels:  [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 
+              0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 
+              0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+              1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 
+              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 
+              0.0]
+    Prediction:  [ 0.  0.  0. ...,  0.  0.  0.]
+"""
+
+
+
+from sklearn.metrics import classification_report
+
+target_names = ["Not POI", "POI"]
+print "Classification Report:"
+print classification_report(y_true=labels_test, y_pred=pred, target_names=target_names)
+"""
+Classification Report:
+             precision    recall  f1-score   support
+
+    Not POI       0.84      0.84      0.84        25
+        POI       0.00      0.00      0.00         4
+
+avg / total       0.72      0.72      0.72        29
+"""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
